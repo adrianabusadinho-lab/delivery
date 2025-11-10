@@ -1047,7 +1047,7 @@
 
         // Sua configuração Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyCxokW1qooUb0RRU2IqdvZHvObuYSv9AL0",
+            apiKey: "AIzaSyCxokWIgooUb0RRU2IgdvZHvObuYSv9AL0",
             authDomain: "tuta-lanches.firebaseapp.com",
             databaseURL: "https://tuta-lanches-default-rtdb.firebaseio.com",
             projectId: "tuta-lanches",
@@ -1291,7 +1291,8 @@
 
         // Controle de som de notificação
         let somAtivado = localStorage.getItem('somNotificacao') !== 'false'; // Ativado por padrão
-        let ultimoStatus = null; // Para detectar mudanças de status
+    let ultimoStatus = null; // Para detectar mudanças de status
+    let pollIntervalId = null; // fallback polling para detectar mudanças quando listener realtime falhar
 
         // Áudio de notificação (usando Web Audio API para criar som)
         function tocarSomNotificacao() {
@@ -1361,12 +1362,17 @@
             }
 
             // Remove listener anterior se existir
-            if (activeOrderListener && currentOrderKey) {
+                if (activeOrderListener && currentOrderKey) {
                 try {
                     // onValue returns an unsubscribe function in modular SDK
                     if (typeof activeOrderListener === 'function') {
                         activeOrderListener();
                     }
+                        // limpa polling fallback se houver
+                        if (pollIntervalId) {
+                            clearInterval(pollIntervalId);
+                            pollIntervalId = null;
+                        }
                 } catch (e) {
                     console.warn('Erro ao remover listener anterior:', e);
                 }
@@ -1443,6 +1449,29 @@
                                 `;
                             }
                         });
+                            // Polling fallback: verifica a cada 5s o status do pedido caso o listener realtime não funcione no host externo
+                            try {
+                                if (pollIntervalId) { clearInterval(pollIntervalId); pollIntervalId = null; }
+                                pollIntervalId = setInterval(async () => {
+                                    try {
+                                        const snap = await get(orderRef);
+                                        if (snap && snap.exists()) {
+                                            const p = snap.val();
+                                            if (p.status && p.status !== ultimoStatus) {
+                                                console.log('[POLL] detected status change for', pedidoKey, '->', p.status);
+                                                // atualiza UI e toca som/mostra notificação como no listener
+                                                tocarSomNotificacao();
+                                                if (Notification.permission === 'granted') {
+                                                    try { new Notification('🔔 Pedido Atualizado!', { body: `Seu pedido está: ${p.status}`, icon: '/img/logo.png', tag: 'status-change' }); } catch(e){console.warn('Notification error', e);}                                            }
+                                                ultimoStatus = p.status;
+                                                renderOrderWithProgressBar(p, codigo);
+                                            }
+                                        }
+                                    } catch (err) {
+                                        console.warn('[POLL] erro ao buscar pedido:', err);
+                                    }
+                                }, 5000);
+                            } catch(e){ console.warn('Erro iniciando polling fallback:', e); }
                     } else {
                         resultado.style.display = 'block';
                         resultado.innerHTML = `
