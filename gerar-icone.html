@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Gerador de Ícones - Tuta Lanches</title>
+</head>
+<body style="margin: 0; padding: 20px; background: #f5f5f5; font-family: Arial;">
+    <div style="max-width: 600px; margin: 0 auto; text-align: center;">
+        <h1 style="color: #00a868;">🍔 Gerador de Ícones - Tuta Lanches</h1>
+        <p><strong>Clique no botão para baixar TODOS os ícones de uma vez!</strong></p>
+        
+        <button id="downloadAll" style="background: #00a868; color: white; border: none; padding: 20px 40px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 18px; margin: 20px 0;">
+            ⬇️ BAIXAR TODOS OS ÍCONES (8 arquivos)
+        </button>
+        
+        <div id="icons" style="margin: 20px 0;"></div>
+        
+        <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px; text-align: left;">
+            <h3 style="color: #00a868;">📋 Instruções:</h3>
+            <ol style="line-height: 2;">
+                <li>Clique no botão verde acima</li>
+                <li>8 ícones serão baixados automaticamente</li>
+                <li>Mova todos para a pasta <code>img/</code></li>
+                <li>Faça upload no GitHub</li>
+                <li>Pronto! Logo profissional instalado! 🎉</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+
+        function createIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // Fundo verde gradiente
+            const gradient = ctx.createLinearGradient(0, 0, 0, size);
+            gradient.addColorStop(0, '#00c878');
+            gradient.addColorStop(1, '#00a868');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            // Círculo decorativo
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size * 0.42, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Hambúrguer emoji
+            const emojiSize = size * 0.45;
+            ctx.font = `${emojiSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🍔', size/2, size * 0.38);
+
+            // Texto TUTA com sombra
+            ctx.fillStyle = 'white';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = size * 0.01;
+            ctx.font = `bold ${size * 0.16}px Arial`;
+            ctx.fillText('TUTA', size/2, size * 0.72);
+
+            // Subtítulo para ícones maiores
+            if (size >= 192) {
+                ctx.font = `${size * 0.09}px Arial`;
+                ctx.fillText('LANCHES', size/2, size * 0.86);
+            }
+
+            return canvas;
+        }
+
+        // Mostra preview dos ícones
+        const iconsDiv = document.getElementById('icons');
+        sizes.forEach(size => {
+            const canvas = createIcon(size);
+            canvas.style.cssText = 'border: 2px solid #ddd; border-radius: 8px; margin: 5px; width: 100px; height: 100px;';
+            iconsDiv.appendChild(canvas);
+        });
+
+        // Botão para baixar todos
+        document.getElementById('downloadAll').onclick = () => {
+            const btn = document.getElementById('downloadAll');
+            btn.textContent = '⏳ Baixando...';
+            btn.disabled = true;
+            
+            sizes.forEach((size, index) => {
+                setTimeout(() => {
+                    const canvas = createIcon(size);
+                    canvas.toBlob(blob => {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `icon-${size}x${size}.png`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        
+                        // Atualiza botão
+                        if (index === sizes.length - 1) {
+                            setTimeout(() => {
+                                btn.textContent = '✅ ÍCONES BAIXADOS!';
+                                btn.style.background = '#4caf50';
+                            }, 500);
+                        }
+                    });
+                }, index * 400);
+            });
+        };
+    </script>
+</body>
+</html>
