@@ -93,13 +93,13 @@ exports.enviarNotificacaoMudancaStatus = functions.database
                 status: novoStatus,
                 timestamp: new Date().toISOString()
             },
-            webpush: {
+                webpush: {
                 fcmOptions: {
-                    link: 'https://adriankalid5-lab.github.io/oficial/'
+                    link: '/'
                 },
                 notification: {
-                    icon: '/oficial/img/Captura_de_tela_2025-11-06_123540-removebg-preview.png',
-                    badge: '/oficial/img/Captura_de_tela_2025-11-06_123540-removebg-preview.png',
+                    icon: '/img/Captura_de_tela_2025-11-06_123540-removebg-preview.png',
+                    badge: '/img/Captura_de_tela_2025-11-06_123540-removebg-preview.png',
                     vibrate: [200, 100, 200]
                 }
             }
@@ -180,8 +180,8 @@ exports.enviarNotificacaoMudancaStatus = functions.database
                 webpush: {
                     fcmOptions: { link: '/' },
                     notification: {
-                        icon: '/oficial/img/Captura_de_tela_2025-11-06_123540-removebg-preview.png',
-                        badge: '/oficial/img/Captura_de_tela_2025-11-06_123540-removebg-preview.png'
+                        icon: '/img/Captura_de_tela_2025-11-06_123540-removebg-preview.png',
+                        badge: '/img/Captura_de_tela_2025-11-06_123540-removebg-preview.png'
                     }
                 }
             }));
